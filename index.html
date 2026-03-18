@@ -8,7 +8,9 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    /* ── Reset & Base ── */
+    /* ══════════════════════════════════════════════
+       RESET & BASE
+    ══════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -16,220 +18,342 @@
       background: #f0f4f8;
       color: #1a2b3c;
       min-height: 100vh;
+      -webkit-text-size-adjust: 100%;
     }
 
-    /* ── Layout ── */
-    .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
+    /* ══════════════════════════════════════════════
+       LAYOUT — mobile first, scale up
+    ══════════════════════════════════════════════ */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px 12px 48px;
+    }
+    @media (min-width: 600px) { .page { padding: 24px 20px 56px; } }
+    @media (min-width: 900px) { .page { padding: 32px 28px 60px; } }
 
-    /* ── Header ── */
+    /* ══════════════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════════════ */
     .header {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 36px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
+    @media (min-width: 600px) { .header { gap: 16px; margin-bottom: 28px; } }
+    @media (min-width: 900px) { .header { margin-bottom: 36px; } }
+
     .logo-mark {
-      width: 44px; height: 44px;
+      width: 40px; height: 40px;
       border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
       overflow: hidden;
     }
-    .logo-mark svg { width: 44px; height: 44px; }
-    .header-text h1 { font-size: 1.55rem; font-weight: 700; color: #0d1f2d; line-height: 1.2; }
-    .header-text p { font-size: 0.85rem; color: #5f7a8f; margin-top: 2px; }
+    @media (min-width: 600px) { .logo-mark { width: 44px; height: 44px; } }
+    .logo-mark svg { width: 100%; height: 100%; }
 
-    /* ── Grid ── */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    @media (max-width: 720px) {
-      .grid-2 { grid-template-columns: 1fr; }
-      .grid-3 { grid-template-columns: 1fr; }
+    .header-text h1 {
+      font-size: clamp(1rem, 4.5vw, 1.55rem);
+      font-weight: 700; color: #0d1f2d; line-height: 1.2;
+    }
+    .header-text p {
+      font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+      color: #5f7a8f; margin-top: 2px; line-height: 1.4;
     }
 
-    /* ── Cards ── */
+    /* ══════════════════════════════════════════════
+       GRIDS — 1-col mobile → 2/3 col desktop
+    ══════════════════════════════════════════════ */
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+    @media (min-width: 480px) {
+      .grid-3 { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    }
+    @media (min-width: 860px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; gap: 20px; }
+    }
+
+    /* ══════════════════════════════════════════════
+       CARDS
+    ══════════════════════════════════════════════ */
     .card {
       background: #ffffff;
-      border-radius: 16px;
-      padding: 24px;
+      border-radius: 14px;
+      padding: 16px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.07);
       border: 1px solid #e2eaf2;
     }
+    @media (min-width: 600px) { .card { padding: 20px; border-radius: 16px; } }
+    @media (min-width: 900px) { .card { padding: 24px; } }
+
     .card-title {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #7c97ae;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
-    /* ── Sliders ── */
-    .slider-row { margin-bottom: 22px; }
-    .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-    .slider-label { font-size: 0.9rem; font-weight: 600; color: #2c4a5e; }
+    /* ══════════════════════════════════════════════
+       SLIDERS — touch-friendly on mobile
+    ══════════════════════════════════════════════ */
+    .slider-row { margin-bottom: 20px; }
+    .slider-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px; gap: 8px;
+    }
+    .slider-label {
+      font-size: clamp(0.8rem, 2.8vw, 0.9rem);
+      font-weight: 600; color: #2c4a5e;
+    }
     .slider-value {
-      font-size: 1.1rem; font-weight: 700; color: #00a651;
-      background: #edfaf2; padding: 2px 10px; border-radius: 6px;
+      font-size: clamp(0.95rem, 3vw, 1.1rem);
+      font-weight: 700; color: #00a651;
+      background: #edfaf2; padding: 3px 10px; border-radius: 6px;
+      white-space: nowrap; flex-shrink: 0;
     }
 
+    /* Track */
     input[type=range] {
       -webkit-appearance: none;
-      width: 100%; height: 6px;
-      border-radius: 3px;
+      width: 100%; height: 8px;
+      border-radius: 4px;
       background: #d4e8f0;
       outline: none;
       cursor: pointer;
     }
+    @media (min-width: 900px) { input[type=range] { height: 6px; } }
+
+    /* Thumb — 28px on mobile for easy touch, 22px on desktop */
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 20px; height: 20px;
+      width: 28px; height: 28px;
       border-radius: 50%;
       background: #00a651;
-      box-shadow: 0 2px 6px rgba(0,166,81,0.4);
+      box-shadow: 0 2px 8px rgba(0,166,81,0.45);
       cursor: pointer;
       transition: transform 0.15s;
     }
-    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
-    .slider-hints { display: flex; justify-content: space-between; font-size: 0.72rem; color: #9db5c4; margin-top: 4px; }
+    @media (min-width: 900px) {
+      input[type=range]::-webkit-slider-thumb { width: 22px; height: 22px; }
+    }
+    input[type=range]::-webkit-slider-thumb:active { transform: scale(1.2); }
+    input[type=range]::-moz-range-thumb {
+      width: 28px; height: 28px;
+      border-radius: 50%; border: none;
+      background: #00a651;
+      box-shadow: 0 2px 8px rgba(0,166,81,0.45);
+      cursor: pointer;
+    }
+    @media (min-width: 900px) {
+      input[type=range]::-moz-range-thumb { width: 22px; height: 22px; }
+    }
 
-    /* ── Technique Comparison ── */
-    .technique-comparison { display: flex; gap: 12px; align-items: stretch; }
+    .slider-hints {
+      display: flex; justify-content: space-between;
+      font-size: 0.7rem; color: #9db5c4; margin-top: 5px;
+    }
+
+    /* ══════════════════════════════════════════════
+       TECHNIQUE COMPARISON
+       — vertical stack on mobile, side-by-side on tablet+
+    ══════════════════════════════════════════════ */
+    .technique-comparison {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    @media (min-width: 480px) {
+      .technique-comparison { flex-direction: row; align-items: stretch; gap: 12px; }
+    }
+
     .technique-card {
       flex: 1;
       border-radius: 12px;
-      padding: 18px;
+      padding: 16px;
       text-align: center;
     }
-    .technique-card.old {
-      background: #fff5f5;
-      border: 2px solid #f5b8b8;
+    /* On mobile, show cards side-by-side within the column layout */
+    @media (max-width: 479px) {
+      .technique-comparison { flex-direction: row; }
+      .technique-card { padding: 12px 10px; }
     }
-    .technique-card.new {
-      background: #f0fdf6;
-      border: 2px solid #86efad;
-    }
+
+    .technique-card.old { background: #fff5f5; border: 2px solid #f5b8b8; }
+    .technique-card.new { background: #f0fdf6; border: 2px solid #86efad; }
+
     .technique-label {
-      font-size: 0.7rem; font-weight: 700;
+      font-size: 0.68rem; font-weight: 700;
       letter-spacing: 0.1em; text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .technique-card.old .technique-label { color: #c0392b; }
     .technique-card.new .technique-label { color: #16a34a; }
+
     .technique-minutes {
-      font-size: 2.4rem; font-weight: 800; line-height: 1;
-      margin-bottom: 4px;
+      font-size: clamp(2rem, 7vw, 2.6rem);
+      font-weight: 800; line-height: 1; margin-bottom: 4px;
     }
     .technique-card.old .technique-minutes { color: #e74c3c; }
     .technique-card.new .technique-minutes { color: #16a34a; }
-    .technique-unit { font-size: 0.8rem; color: #6b7280; }
-    .technique-name { font-size: 0.78rem; font-weight: 600; color: #374151; margin-top: 8px; }
+
+    .technique-unit { font-size: 0.78rem; color: #6b7280; }
+    .technique-name { font-size: 0.75rem; font-weight: 600; color: #374151; margin-top: 6px; }
+
     .vs-badge {
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.85rem; font-weight: 800; color: #7c97ae;
-      flex-shrink: 0; width: 36px;
+      font-size: 0.82rem; font-weight: 800; color: #7c97ae;
+      flex-shrink: 0; width: 32px;
     }
 
-    /* ── Time Bar ── */
-    .time-bar-section { margin-top: 20px; }
+    /* ══════════════════════════════════════════════
+       TIME BARS
+    ══════════════════════════════════════════════ */
+    .time-bar-section { margin-top: 16px; }
     .time-bar-label {
-      font-size: 0.78rem; font-weight: 600; color: #4a6273; margin-bottom: 6px;
-      display: flex; justify-content: space-between;
+      font-size: 0.75rem; font-weight: 600; color: #4a6273;
+      margin-bottom: 5px;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 6px; flex-wrap: wrap;
     }
     .bar-track {
-      height: 12px; background: #e8f0f6; border-radius: 6px; overflow: hidden; margin-bottom: 10px;
+      height: 12px; background: #e8f0f6; border-radius: 6px;
+      overflow: hidden; margin-bottom: 10px;
     }
     .bar-fill {
       height: 100%; border-radius: 6px;
       transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
     }
-    .bar-old { background: linear-gradient(90deg, #e74c3c, #f08080); }
-    .bar-new { background: linear-gradient(90deg, #16a34a, #4ade80); }
+    .bar-old   { background: linear-gradient(90deg, #e74c3c, #f08080); }
+    .bar-new   { background: linear-gradient(90deg, #16a34a, #4ade80); }
     .bar-saved { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
 
-    /* ── KPI Cards ── */
+    /* ══════════════════════════════════════════════
+       KPI CARDS
+    ══════════════════════════════════════════════ */
     .kpi-card {
-      border-radius: 14px; padding: 20px; text-align: center;
+      border-radius: 14px; padding: 16px; text-align: center;
       transition: transform 0.2s;
     }
+    @media (min-width: 600px) { .kpi-card { padding: 20px; } }
     .kpi-card:hover { transform: translateY(-2px); }
+
     .kpi-card.highlight {
       background: linear-gradient(135deg, #00a651 0%, #007a3d 100%);
       color: white;
       box-shadow: 0 6px 20px rgba(0,166,81,0.35);
     }
-    .kpi-card.neutral {
-      background: #f8fbff; border: 1px solid #d6e8f5;
-    }
+    .kpi-card.neutral { background: #f8fbff; border: 1px solid #d6e8f5; }
     .kpi-card.amber {
       background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       color: white;
       box-shadow: 0 6px 20px rgba(245,158,11,0.35);
     }
-    .kpi-icon { font-size: 1.6rem; margin-bottom: 8px; }
+
+    .kpi-icon { font-size: 1.5rem; margin-bottom: 6px; }
+
+    /* Big readable numbers — scale with viewport */
     .kpi-value {
-      font-size: 1.9rem; font-weight: 800; line-height: 1.1;
+      font-size: clamp(1.45rem, 5.5vw, 2rem);
+      font-weight: 800; line-height: 1.1;
     }
     .kpi-card.neutral .kpi-value { color: #0d4f8c; }
+
     .kpi-label {
-      font-size: 0.73rem; font-weight: 600; letter-spacing: 0.06em;
+      font-size: clamp(0.62rem, 2vw, 0.73rem);
+      font-weight: 600; letter-spacing: 0.06em;
       text-transform: uppercase; margin-top: 4px; opacity: 0.85;
     }
     .kpi-card.neutral .kpi-label { color: #5f7a8f; }
-    .kpi-sub { font-size: 0.72rem; margin-top: 6px; opacity: 0.75; }
+    .kpi-sub { font-size: 0.7rem; margin-top: 5px; opacity: 0.75; }
 
-    /* ── Revenue Model ── */
-    .revenue-breakdown { margin-top: 20px; }
+    /* ══════════════════════════════════════════════
+       REVENUE BREAKDOWN TABLE
+    ══════════════════════════════════════════════ */
+    .revenue-breakdown { margin-top: 16px; }
     .rev-row {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 0; border-bottom: 1px solid #eef3f8;
+      padding: 9px 0; border-bottom: 1px solid #eef3f8; gap: 6px;
     }
     .rev-row:last-child { border-bottom: none; }
-    .rev-name { font-size: 0.85rem; font-weight: 500; color: #374151; }
+    .rev-name { font-size: 0.82rem; font-weight: 500; color: #374151; flex: 1; }
     .rev-tag {
-      font-size: 0.72rem; font-weight: 600;
-      padding: 2px 8px; border-radius: 4px;
+      font-size: 0.68rem; font-weight: 600;
+      padding: 2px 7px; border-radius: 4px; flex-shrink: 0;
+      display: none; /* hidden on mobile — too cramped */
     }
-    .tag-expense { background: #fee2e2; color: #991b1b; }
-    .tag-profit { background: #dcfce7; color: #166534; }
-    .tag-revenue { background: #fef3c7; color: #92400e; }
-    .rev-amount { font-size: 0.95rem; font-weight: 700; }
+    @media (min-width: 480px) { .rev-tag { display: inline-block; } }
 
-    /* ── Progress ring ── */
-    .ring-section { display: flex; align-items: center; gap: 20px; margin-top: 16px; }
+    .tag-expense { background: #fee2e2; color: #991b1b; }
+    .tag-profit  { background: #dcfce7; color: #166534; }
+    .tag-revenue { background: #fef3c7; color: #92400e; }
+    .rev-amount  { font-size: 0.92rem; font-weight: 700; flex-shrink: 0; }
+
+    /* ══════════════════════════════════════════════
+       DONUT RING
+    ══════════════════════════════════════════════ */
+    .ring-section {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 16px; margin-top: 14px;
+    }
+    @media (min-width: 480px) {
+      .ring-section { flex-direction: row; align-items: center; }
+    }
+
     .ring-container { position: relative; flex-shrink: 0; }
     .ring-label-center {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-      text-align: center;
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%); text-align: center;
     }
-    .ring-pct { font-size: 1.3rem; font-weight: 800; color: #00a651; }
-    .ring-sub { font-size: 0.6rem; color: #7c97ae; font-weight: 600; }
-    .ring-legend { flex: 1; }
+    .ring-pct  { font-size: clamp(1.1rem, 4vw, 1.4rem); font-weight: 800; color: #00a651; }
+    .ring-sub  { font-size: 0.58rem; color: #7c97ae; font-weight: 600; }
+    .ring-legend { flex: 1; width: 100%; }
     .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .legend-dot  { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
     .legend-text { font-size: 0.78rem; color: #374151; }
-    .legend-val { font-size: 0.78rem; font-weight: 700; margin-left: auto; color: #1a2b3c; }
+    .legend-val  { font-size: 0.78rem; font-weight: 700; margin-left: auto; color: #1a2b3c; }
 
-    /* ── Footer note ── */
-    .footnote {
-      font-size: 0.72rem; color: #9db5c4; margin-top: 28px;
-      border-top: 1px solid #e2eaf2; padding-top: 14px; line-height: 1.6;
-    }
+    /* ══════════════════════════════════════════════
+       UTILITIES
+    ══════════════════════════════════════════════ */
+    .section-gap { margin-top: 14px; }
+    @media (min-width: 600px) { .section-gap { margin-top: 20px; } }
 
-    /* ── Section separator ── */
-    .section-gap { margin-top: 20px; }
-
-    /* ── Animated number ── */
     .animated { transition: all 0.35s ease; }
 
-    /* ── Pill badge ── */
     .pill {
       display: inline-block;
-      padding: 3px 10px; border-radius: 999px;
-      font-size: 0.72rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 0.68rem; font-weight: 700;
     }
     .pill-green { background: #dcfce7; color: #166534; }
     .pill-red   { background: #fee2e2; color: #991b1b; }
+
+    .footnote {
+      font-size: 0.7rem; color: #9db5c4; margin-top: 24px;
+      border-top: 1px solid #e2eaf2; padding-top: 12px; line-height: 1.7;
+    }
+
+    /* ══════════════════════════════════════════════
+       CALCULATION BOX (fluoride section)
+    ══════════════════════════════════════════════ */
+    .calc-box {
+      background: #fffbeb; border-radius: 12px;
+      padding: 14px 16px; border: 1px solid #fde68a;
+      overflow-wrap: break-word; word-break: break-word;
+    }
+    .calc-box-title {
+      font-size: 0.72rem; font-weight: 700; color: #92400e;
+      margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .calc-box-body {
+      font-size: clamp(0.72rem, 2.2vw, 0.8rem);
+      color: #78350f; line-height: 1.7;
+    }
   </style>
 </head>
 <body>
@@ -543,16 +667,12 @@ function App() {
               </div>
             </div>
 
-            <div style={{ background: '#fffbeb', borderRadius: 12, padding: '14px 16px', border: '1px solid #fde68a' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#92400e', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                💡 How the calculation works
-              </div>
-              <div style={{ fontSize: '0.8rem', color: '#78350f', lineHeight: 1.6 }}>
-                {fmt(basePatients)} accepted patients
-                &nbsp;→&nbsp; {hypersensitivePct}% hypersensitive = <strong>{fmt(hypersensitivePatients)}</strong>
-                &nbsp;→&nbsp; {acceptancePct}% accept = <strong>{fmt(acceptingPatients)} patients</strong><br/>
+            <div className="calc-box">
+              <div className="calc-box-title">💡 How the calculation works</div>
+              <div className="calc-box-body">
+                {fmt(basePatients)} patients → {hypersensitivePct}% sensitive = <strong>{fmt(hypersensitivePatients)}</strong> → {acceptancePct}% accept = <strong>{fmt(acceptingPatients)} patients</strong><br/>
                 Revenue: {fmt(acceptingPatients)} × {fmtEur(treatmentPrice)} × {applications} = <strong>{fmtEur(fluorideRevenue)}</strong><br/>
-                Cost: ({fmtEur(materialCost)} + 5min × {fmtEur(chairCost)}/h) × {applications} × {fmt(acceptingPatients)} = <strong>{fmtEur(fluorideMaterialCost + fluorideTimeCost)}</strong>
+                Cost: ({fmtEur(materialCost)} mat. + 5min chair) × {applications} × {fmt(acceptingPatients)} = <strong>{fmtEur(fluorideMaterialCost + fluorideTimeCost)}</strong>
               </div>
             </div>
           </div>

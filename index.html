@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solventum — Clinic Profitability Calculator</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f0f4f8;
+      color: #1a2b3c;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .logo-mark {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .logo-mark svg { width: 44px; height: 44px; }
+    .header-text h1 { font-size: 1.55rem; font-weight: 700; color: #0d1f2d; line-height: 1.2; }
+    .header-text p { font-size: 0.85rem; color: #5f7a8f; margin-top: 2px; }
+
+    /* ── Grid ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 720px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      border: 1px solid #e2eaf2;
+    }
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #7c97ae;
+      margin-bottom: 16px;
+    }
+
+    /* ── Sliders ── */
+    .slider-row { margin-bottom: 22px; }
+    .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .slider-label { font-size: 0.9rem; font-weight: 600; color: #2c4a5e; }
+    .slider-value {
+      font-size: 1.1rem; font-weight: 700; color: #00a651;
+      background: #edfaf2; padding: 2px 10px; border-radius: 6px;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%; height: 6px;
+      border-radius: 3px;
+      background: #d4e8f0;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #00a651;
+      box-shadow: 0 2px 6px rgba(0,166,81,0.4);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    .slider-hints { display: flex; justify-content: space-between; font-size: 0.72rem; color: #9db5c4; margin-top: 4px; }
+
+    /* ── Technique Comparison ── */
+    .technique-comparison { display: flex; gap: 12px; align-items: stretch; }
+    .technique-card {
+      flex: 1;
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+    .technique-card.old {
+      background: #fff5f5;
+      border: 2px solid #f5b8b8;
+    }
+    .technique-card.new {
+      background: #f0fdf6;
+      border: 2px solid #86efad;
+    }
+    .technique-label {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .technique-card.old .technique-label { color: #c0392b; }
+    .technique-card.new .technique-label { color: #16a34a; }
+    .technique-minutes {
+      font-size: 2.4rem; font-weight: 800; line-height: 1;
+      margin-bottom: 4px;
+    }
+    .technique-card.old .technique-minutes { color: #e74c3c; }
+    .technique-card.new .technique-minutes { color: #16a34a; }
+    .technique-unit { font-size: 0.8rem; color: #6b7280; }
+    .technique-name { font-size: 0.78rem; font-weight: 600; color: #374151; margin-top: 8px; }
+    .vs-badge {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 800; color: #7c97ae;
+      flex-shrink: 0; width: 36px;
+    }
+
+    /* ── Time Bar ── */
+    .time-bar-section { margin-top: 20px; }
+    .time-bar-label {
+      font-size: 0.78rem; font-weight: 600; color: #4a6273; margin-bottom: 6px;
+      display: flex; justify-content: space-between;
+    }
+    .bar-track {
+      height: 12px; background: #e8f0f6; border-radius: 6px; overflow: hidden; margin-bottom: 10px;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 6px;
+      transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .bar-old { background: linear-gradient(90deg, #e74c3c, #f08080); }
+    .bar-new { background: linear-gradient(90deg, #16a34a, #4ade80); }
+    .bar-saved { background: linear-gradient(90deg, #f59e0b, #fcd34d); }
+
+    /* ── KPI Cards ── */
+    .kpi-card {
+      border-radius: 14px; padding: 20px; text-align: center;
+      transition: transform 0.2s;
+    }
+    .kpi-card:hover { transform: translateY(-2px); }
+    .kpi-card.highlight {
+      background: linear-gradient(135deg, #00a651 0%, #007a3d 100%);
+      color: white;
+      box-shadow: 0 6px 20px rgba(0,166,81,0.35);
+    }
+    .kpi-card.neutral {
+      background: #f8fbff; border: 1px solid #d6e8f5;
+    }
+    .kpi-card.amber {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      box-shadow: 0 6px 20px rgba(245,158,11,0.35);
+    }
+    .kpi-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .kpi-value {
+      font-size: 1.9rem; font-weight: 800; line-height: 1.1;
+    }
+    .kpi-card.neutral .kpi-value { color: #0d4f8c; }
+    .kpi-label {
+      font-size: 0.73rem; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; margin-top: 4px; opacity: 0.85;
+    }
+    .kpi-card.neutral .kpi-label { color: #5f7a8f; }
+    .kpi-sub { font-size: 0.72rem; margin-top: 6px; opacity: 0.75; }
+
+    /* ── Revenue Model ── */
+    .revenue-breakdown { margin-top: 20px; }
+    .rev-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid #eef3f8;
+    }
+    .rev-row:last-child { border-bottom: none; }
+    .rev-name { font-size: 0.85rem; font-weight: 500; color: #374151; }
+    .rev-tag {
+      font-size: 0.72rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 4px;
+    }
+    .tag-expense { background: #fee2e2; color: #991b1b; }
+    .tag-profit { background: #dcfce7; color: #166534; }
+    .tag-revenue { background: #fef3c7; color: #92400e; }
+    .rev-amount { font-size: 0.95rem; font-weight: 700; }
+
+    /* ── Progress ring ── */
+    .ring-section { display: flex; align-items: center; gap: 20px; margin-top: 16px; }
+    .ring-container { position: relative; flex-shrink: 0; }
+    .ring-label-center {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      text-align: center;
+    }
+    .ring-pct { font-size: 1.3rem; font-weight: 800; color: #00a651; }
+    .ring-sub { font-size: 0.6rem; color: #7c97ae; font-weight: 600; }
+    .ring-legend { flex: 1; }
+    .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .legend-text { font-size: 0.78rem; color: #374151; }
+    .legend-val { font-size: 0.78rem; font-weight: 700; margin-left: auto; color: #1a2b3c; }
+
+    /* ── Footer note ── */
+    .footnote {
+      font-size: 0.72rem; color: #9db5c4; margin-top: 28px;
+      border-top: 1px solid #e2eaf2; padding-top: 14px; line-height: 1.6;
+    }
+
+    /* ── Section separator ── */
+    .section-gap { margin-top: 20px; }
+
+    /* ── Animated number ── */
+    .animated { transition: all 0.35s ease; }
+
+    /* ── Pill badge ── */
+    .pill {
+      display: inline-block;
+      padding: 3px 10px; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 700;
+    }
+    .pill-green { background: #dcfce7; color: #166534; }
+    .pill-red   { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useMemo } = React;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const fmt = (n, decimals = 0) =>
+  n.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+const fmtEur = (n) => `€\u202f${fmt(Math.round(n))}`;
+
+function Ring({ pct, size = 120, stroke = 12 }) {
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const profitDash  = circ * (pct / 100);
+  const expenseDash = circ - profitDash;
+  const center = size / 2;
+
+  return (
+    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+      {/* background */}
+      <circle cx={center} cy={center} r={r} fill="none"
+        stroke="#e8f0f6" strokeWidth={stroke} />
+      {/* expenses (red) */}
+      <circle cx={center} cy={center} r={r} fill="none"
+        stroke="#e74c3c" strokeWidth={stroke}
+        strokeDasharray={`${expenseDash} ${profitDash}`}
+        strokeDashoffset={0}
+        style={{ transition: 'stroke-dasharray 0.4s ease' }} />
+      {/* profit (green) */}
+      <circle cx={center} cy={center} r={r} fill="none"
+        stroke="#00a651" strokeWidth={stroke}
+        strokeDasharray={`${profitDash} ${expenseDash}`}
+        strokeDashoffset={-expenseDash}
+        style={{ transition: 'stroke-dasharray 0.4s ease' }} />
+    </svg>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
+function App() {
+  // Sliders
+  const [totalFillings, setTotalFillings] = useState(1215);
+  const [posteriorPct,  setPosteriorPct]  = useState(75);
+  const [chairCost,     setChairCost]     = useState(60);
+  const [oldMinutes,    setOldMinutes]    = useState(28);
+  const [newMinutes,    setNewMinutes]    = useState(12);
+
+  // Fluoride treatment sliders
+  const [hypersensitivePct, setHypersensitivePct] = useState(51); // ~800/1575
+  const [acceptancePct,     setAcceptancePct]     = useState(10);
+  const [treatmentPrice,    setTreatmentPrice]    = useState(35);
+  const [materialCost,      setMaterialCost]      = useState(2.5);
+  const [applications,      setApplications]      = useState(2);
+
+  // Base clinic
+  const baseRevenue  = 250000;
+  const basePatients = 1575; // accepted patients
+
+  // ── Bulk Fill Calculations ──────────────────────────────────────────────────
+  const posteriorCases = useMemo(() => Math.round(totalFillings * posteriorPct / 100), [totalFillings, posteriorPct]);
+  const oldHours       = useMemo(() => (oldMinutes * posteriorCases) / 60, [oldMinutes, posteriorCases]);
+  const newHours       = useMemo(() => (newMinutes * posteriorCases) / 60, [newMinutes, posteriorCases]);
+  const savedHours     = useMemo(() => oldHours - newHours, [oldHours, newHours]);
+  const savedEuros     = useMemo(() => savedHours * chairCost,  [savedHours, chairCost]);
+  const timeSavedPct   = useMemo(() => (savedHours / oldHours) * 100, [savedHours, oldHours]);
+
+  // ── Fluoride Calculations ──────────────────────────────────────────────────
+  const hypersensitivePatients = useMemo(() => Math.round(basePatients * hypersensitivePct / 100), [hypersensitivePct]);
+  const acceptingPatients      = useMemo(() => Math.round(hypersensitivePatients * acceptancePct / 100), [hypersensitivePatients, acceptancePct]);
+  const fluorideRevenue        = useMemo(() => acceptingPatients * treatmentPrice * applications, [acceptingPatients, treatmentPrice, applications]);
+  const fluorideMaterialCost   = useMemo(() => materialCost * applications * acceptingPatients, [materialCost, applications, acceptingPatients]);
+  const fluorideTimeCost       = useMemo(() => (5 / 60) * applications * acceptingPatients * chairCost, [applications, acceptingPatients, chairCost]);
+  const fluorideProfit         = useMemo(() => fluorideRevenue - fluorideMaterialCost - fluorideTimeCost, [fluorideRevenue, fluorideMaterialCost, fluorideTimeCost]);
+
+  // ── Clinic P&L (with improvements) ──────────────────────────────────────────
+  const originalExpenses = baseRevenue * 0.70;
+  const originalProfit   = baseRevenue * 0.30;
+  const newRevenue       = baseRevenue + fluorideRevenue;
+  const newExpenses      = originalExpenses - savedEuros + fluorideMaterialCost + fluorideTimeCost;
+  const newProfit        = newRevenue - newExpenses;
+  const newProfitPct     = (newProfit / newRevenue) * 100;
+
+  // bar widths — relative to old hours
+  const maxH  = oldHours;
+  const wOld  = 100;
+  const wNew  = (newHours  / maxH) * 100;
+  const wSave = (savedHours / maxH) * 100;
+
+  return (
+    <div className="page">
+
+      {/* ── Header ── */}
+      <div className="header">
+        <div className="logo-mark">
+          <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+            <rect width="150" height="150" rx="28" fill="#00262A"/>
+            <path d="M70.89,34.04c0-9.29-6.69-15.2-16.17-15.2s-16.7,6.83-16.7,16.89,7.22,17.08,19.29,17.08h20.4c28.77,0,47.49,19.49,47.49,44.89s-19.29,44.89-45.66,44.89-45.66-18.57-45.66-44.17c0-9.29,3.18-19.1,7.99-26.37h10.97c-5.58,7.22-8.52,16.31-8.52,25.6,0,20.21,14.67,35.27,35.27,35.27s35.27-15.01,35.27-35.27-14.67-35.27-37.1-35.27h-20.21c-20.26,.05-29.73-12.03-29.73-26.66s12.08-26.37,26.9-26.37c16.31,0,26.37,10.97,26.37,23.77,0,1.54-.19,3.61-.67,5h-10.1c.34-1.11,.58-2.98,.58-4.09Z" fill="#00E676"/>
+          </svg>
+        </div>
+        <div className="header-text">
+          <h1>Clinic Profitability Calculator</h1>
+          <p>3M™ Filtek™ One Bulk Fill Restorative &amp; 3M™ Clinpro™ Clear Fluoride Treatment — Impact Analysis</p>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          SECTION 1 — BULK FILL EFFICIENCY
+      ══════════════════════════════════════════════════════════════════════ */}
+      <div className="card">
+        <div className="card-title">⏱ Technique Efficiency — Bulk Fill vs. Incremental Layering</div>
+
+        <div className="grid-2">
+
+          {/* Left: sliders */}
+          <div>
+            <div className="slider-row">
+              <div className="slider-header">
+                <span className="slider-label">Annual fillings</span>
+                <span className="slider-value animated">{fmt(totalFillings)}</span>
+              </div>
+              <input type="range" min="400" max="3000" step="10"
+                value={totalFillings} onChange={e => setTotalFillings(+e.target.value)} />
+              <div className="slider-hints"><span>400</span><span>3,000</span></div>
+            </div>
+
+            <div className="slider-row">
+              <div className="slider-header">
+                <span className="slider-label">Posterior sector share</span>
+                <span className="slider-value animated">{posteriorPct}%</span>
+              </div>
+              <input type="range" min="40" max="95" step="1"
+                value={posteriorPct} onChange={e => setPosteriorPct(+e.target.value)} />
+              <div className="slider-hints"><span>40%</span><span>95%</span></div>
+            </div>
+
+            <div className="slider-row">
+              <div className="slider-header">
+                <span className="slider-label">Chair time cost (€/hour)</span>
+                <span className="slider-value animated">{fmtEur(chairCost)}/h</span>
+              </div>
+              <input type="range" min="30" max="200" step="5"
+                value={chairCost} onChange={e => setChairCost(+e.target.value)} />
+              <div className="slider-hints"><span>€30</span><span>€200</span></div>
+            </div>
+
+            <div className="slider-row">
+              <div className="slider-header">
+                <span className="slider-label">Incremental layering time</span>
+                <span className="slider-value animated">{oldMinutes} min</span>
+              </div>
+              <input type="range" min="15" max="60" step="1"
+                value={oldMinutes} onChange={e => setOldMinutes(+e.target.value)} />
+              <div className="slider-hints"><span>15 min</span><span>60 min</span></div>
+            </div>
+
+            <div className="slider-row">
+              <div className="slider-header">
+                <span className="slider-label">Bulk fill technique time</span>
+                <span className="slider-value animated">{newMinutes} min</span>
+              </div>
+              <input type="range" min="5" max={oldMinutes - 1} step="1"
+                value={newMinutes} onChange={e => setNewMinutes(+e.target.value)} />
+              <div className="slider-hints"><span>5 min</span><span>{oldMinutes - 1} min</span></div>
+            </div>
+          </div>
+
+          {/* Right: results */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+            {/* Technique side-by-side */}
+            <div className="technique-comparison">
+              <div className="technique-card old">
+                <div className="technique-label">Old Method</div>
+                <div className="technique-minutes">{oldMinutes}</div>
+                <div className="technique-unit">min / case</div>
+                <div className="technique-name">Incremental Layering</div>
+                <div style={{ marginTop: 8, fontSize: '0.8rem', color: '#c0392b', fontWeight: 600 }}>
+                  {fmt(oldHours, 1)}h / year
+                </div>
+              </div>
+              <div className="vs-badge">VS</div>
+              <div className="technique-card new">
+                <div className="technique-label">Bulk Fill</div>
+                <div className="technique-minutes">{newMinutes}</div>
+                <div className="technique-unit">min / case</div>
+                <div className="technique-name">Bulk Fill (capsules)</div>
+                <div style={{ marginTop: 8, fontSize: '0.8rem', color: '#16a34a', fontWeight: 600 }}>
+                  {fmt(newHours, 1)}h / year
+                </div>
+              </div>
+            </div>
+
+            {/* Time bars */}
+            <div className="time-bar-section">
+              <div className="time-bar-label">
+                <span>Incremental layering — {fmt(oldHours, 1)}h</span>
+                <span className="pill pill-red">{fmt(posteriorCases)} cases</span>
+              </div>
+              <div className="bar-track"><div className="bar-fill bar-old" style={{ width: `${wOld}%` }} /></div>
+
+              <div className="time-bar-label">
+                <span>Bulk fill — {fmt(newHours, 1)}h</span>
+                <span className="pill pill-green">−{Math.round(timeSavedPct)}% time</span>
+              </div>
+              <div className="bar-track"><div className="bar-fill bar-new" style={{ width: `${wNew}%` }} /></div>
+
+              <div className="time-bar-label">
+                <span>⚡ Time saved — {fmt(savedHours, 1)}h</span>
+              </div>
+              <div className="bar-track"><div className="bar-fill bar-saved" style={{ width: `${wSave}%` }} /></div>
+            </div>
+
+            {/* Big savings number */}
+            <div className="kpi-card highlight" style={{ marginTop: 4 }}>
+              <div className="kpi-icon">💰</div>
+              <div className="kpi-value animated">{fmtEur(savedEuros)}</div>
+              <div className="kpi-label">Annual savings from Bulk Fill</div>
+              <div className="kpi-sub">{fmt(savedHours, 1)} hours reclaimed · {fmt(posteriorCases)} posterior cases</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          SECTION 2 — FLUORIDE REVENUE (Clinpro Clear)
+      ══════════════════════════════════════════════════════════════════════ */}
+      <div className="card section-gap">
+        <div className="card-title">🦷 New Revenue — 3M™ Clinpro™ Clear Fluoride Treatment</div>
+
+        <div className="grid-2">
+          <div>
+            <div className="slider-row">
+              <div className="slider-header">
+                <span className="slider-label">Patients with hypersensitivity</span>
+                <span className="slider-value animated">{hypersensitivePct}% ({fmt(hypersensitivePatients)} p)</span>
+              </div>
+              <input type="range" min="10" max="80" step="1"
+                value={hypersensitivePct} onChange={e => setHypersensitivePct(+e.target.value)} />
+              <div className="slider-hints"><span>10%</span><span>80%</span></div>
+            </div>
+
+            <div className="slider-row">
+              <div className="slider-header">
+                <span className="slider-label">Treatment acceptance rate</span>
+                <span className="slider-value animated">{acceptancePct}% ({fmt(acceptingPatients)} p)</span>
+              </div>
+              <input type="range" min="2" max="50" step="1"
+                value={acceptancePct} onChange={e => setAcceptancePct(+e.target.value)} />
+              <div className="slider-hints"><span>2%</span><span>50%</span></div>
+            </div>
+
+            <div className="slider-row">
+              <div className="slider-header">
+                <span className="slider-label">Price per application</span>
+                <span className="slider-value animated">{fmtEur(treatmentPrice)}</span>
+              </div>
+              <input type="range" min="15" max="100" step="5"
+                value={treatmentPrice} onChange={e => setTreatmentPrice(+e.target.value)} />
+              <div className="slider-hints"><span>€15</span><span>€100</span></div>
+            </div>
+
+            <div className="slider-row">
+              <div className="slider-header">
+                <span className="slider-label">Applications per year</span>
+                <span className="slider-value animated">{applications}</span>
+              </div>
+              <input type="range" min="1" max="4" step="1"
+                value={applications} onChange={e => setApplications(+e.target.value)} />
+              <div className="slider-hints"><span>1</span><span>4</span></div>
+            </div>
+
+            <div className="slider-row">
+              <div className="slider-header">
+                <span className="slider-label">Material cost per application</span>
+                <span className="slider-value animated">{fmtEur(materialCost)}</span>
+              </div>
+              <input type="range" min="1" max="15" step="0.5"
+                value={materialCost} onChange={e => setMaterialCost(+e.target.value)} />
+              <div className="slider-hints"><span>€1</span><span>€15</span></div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="kpi-card neutral">
+                <div className="kpi-icon">📋</div>
+                <div className="kpi-value animated">{fmt(acceptingPatients)}</div>
+                <div className="kpi-label">Patients treated</div>
+                <div className="kpi-sub">{acceptancePct}% of {fmt(hypersensitivePatients)} sensitive</div>
+              </div>
+              <div className="kpi-card neutral">
+                <div className="kpi-icon">💳</div>
+                <div className="kpi-value animated">{fmtEur(fluorideRevenue)}</div>
+                <div className="kpi-label">Gross revenue</div>
+                <div className="kpi-sub">{applications}× {fmtEur(treatmentPrice)} / patient</div>
+              </div>
+              <div className="kpi-card neutral">
+                <div className="kpi-icon">🧪</div>
+                <div className="kpi-value animated">{fmtEur(fluorideMaterialCost + fluorideTimeCost)}</div>
+                <div className="kpi-label">Treatment cost</div>
+                <div className="kpi-sub">Materials + chair time</div>
+              </div>
+              <div className="kpi-card highlight" style={{ background: 'linear-gradient(135deg,#0d4f8c,#1a6db5)', boxShadow: '0 6px 20px rgba(13,79,140,0.3)' }}>
+                <div className="kpi-icon">📈</div>
+                <div className="kpi-value animated">{fmtEur(Math.max(0, fluorideProfit))}</div>
+                <div className="kpi-label">Net profit</div>
+                <div className="kpi-sub">+ Patient loyalty</div>
+              </div>
+            </div>
+
+            <div style={{ background: '#fffbeb', borderRadius: 12, padding: '14px 16px', border: '1px solid #fde68a' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#92400e', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                💡 How the calculation works
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#78350f', lineHeight: 1.6 }}>
+                {fmt(basePatients)} accepted patients
+                &nbsp;→&nbsp; {hypersensitivePct}% hypersensitive = <strong>{fmt(hypersensitivePatients)}</strong>
+                &nbsp;→&nbsp; {acceptancePct}% accept = <strong>{fmt(acceptingPatients)} patients</strong><br/>
+                Revenue: {fmt(acceptingPatients)} × {fmtEur(treatmentPrice)} × {applications} = <strong>{fmtEur(fluorideRevenue)}</strong><br/>
+                Cost: ({fmtEur(materialCost)} + 5min × {fmtEur(chairCost)}/h) × {applications} × {fmt(acceptingPatients)} = <strong>{fmtEur(fluorideMaterialCost + fluorideTimeCost)}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          SECTION 3 — COMBINED P&L IMPACT
+      ══════════════════════════════════════════════════════════════════════ */}
+      <div className="card section-gap">
+        <div className="card-title">📊 Combined Impact on Clinic P&amp;L</div>
+
+        <div className="grid-2">
+
+          {/* Left: ring + legend */}
+          <div>
+            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#4a6273', marginBottom: 12 }}>
+              Profit margin after both improvements
+            </div>
+            <div className="ring-section">
+              <div className="ring-container">
+                <Ring pct={Math.max(0, newProfitPct)} size={130} stroke={14} />
+                <div className="ring-label-center">
+                  <div className="ring-pct">{fmt(Math.max(0, newProfitPct), 1)}%</div>
+                  <div className="ring-sub">PROFIT</div>
+                </div>
+              </div>
+              <div className="ring-legend">
+                <div className="legend-item">
+                  <div className="legend-dot" style={{ background: '#00a651' }}></div>
+                  <span className="legend-text">Profit</span>
+                  <span className="legend-val">{fmtEur(newProfit)}</span>
+                </div>
+                <div className="legend-item">
+                  <div className="legend-dot" style={{ background: '#e74c3c' }}></div>
+                  <span className="legend-text">Expenses</span>
+                  <span className="legend-val">{fmtEur(newExpenses)}</span>
+                </div>
+                <div className="legend-item">
+                  <div className="legend-dot" style={{ background: '#f59e0b' }}></div>
+                  <span className="legend-text">Total Revenue</span>
+                  <span className="legend-val">{fmtEur(newRevenue)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: breakdown table */}
+          <div>
+            <div className="revenue-breakdown">
+              <div className="rev-row">
+                <span className="rev-name">Base Revenue</span>
+                <span className="rev-tag tag-revenue">Revenue</span>
+                <span className="rev-amount">{fmtEur(baseRevenue)}</span>
+              </div>
+              <div className="rev-row">
+                <span className="rev-name">+ Fluoride Treatment Revenue</span>
+                <span className="rev-tag tag-revenue">Revenue</span>
+                <span className="rev-amount" style={{ color: '#16a34a' }}>+{fmtEur(fluorideRevenue)}</span>
+              </div>
+              <div className="rev-row">
+                <span className="rev-name">Base Fixed Expenses</span>
+                <span className="rev-tag tag-expense">Fixed</span>
+                <span className="rev-amount" style={{ color: '#c0392b' }}>{fmtEur(120000)}</span>
+              </div>
+              <div className="rev-row">
+                <span className="rev-name">Variable Expenses (reduced)</span>
+                <span className="rev-tag tag-expense">Variable</span>
+                <span className="rev-amount" style={{ color: '#c0392b' }}>{fmtEur(55000 - savedEuros)}</span>
+              </div>
+              <div className="rev-row">
+                <span className="rev-name">+ Fluoride Treatment Cost</span>
+                <span className="rev-tag tag-expense">Variable</span>
+                <span className="rev-amount" style={{ color: '#c0392b' }}>+{fmtEur(fluorideMaterialCost + fluorideTimeCost)}</span>
+              </div>
+              <div className="rev-row" style={{ background: '#f0fdf6', borderRadius: 8, padding: '12px 10px', marginTop: 4 }}>
+                <span className="rev-name" style={{ fontWeight: 700 }}>Net Profit</span>
+                <span className="rev-tag tag-profit">Profit</span>
+                <span className="rev-amount" style={{ color: '#00a651', fontSize: '1.05rem' }}>{fmtEur(newProfit)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom KPIs */}
+        <div className="grid-3 section-gap">
+          <div className="kpi-card amber">
+            <div className="kpi-icon">⏰</div>
+            <div className="kpi-value animated">{fmt(savedHours, 1)}h</div>
+            <div className="kpi-label">Hours Saved / Year</div>
+            <div className="kpi-sub">With Bulk Fill technique</div>
+          </div>
+          <div className="kpi-card highlight">
+            <div className="kpi-icon">💰</div>
+            <div className="kpi-value animated">{fmtEur(savedEuros + Math.max(0, fluorideProfit))}</div>
+            <div className="kpi-label">Total Additional Profit</div>
+            <div className="kpi-sub">Bulk Fill + Fluoride combined</div>
+          </div>
+          <div className="kpi-card neutral">
+            <div className="kpi-icon">📈</div>
+            <div className="kpi-value animated">{fmt(newProfitPct, 1)}%</div>
+            <div className="kpi-label">New Profit Margin</div>
+            <div className="kpi-sub" style={{ color: '#16a34a', fontWeight: 600 }}>
+              was 30.0% → now {fmt(newProfitPct, 1)}%
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Footnote ── */}
+      <p className="footnote">
+        (1) Omnivision Study Spain 2017 – Key-Stone &nbsp;·&nbsp;
+        (2) Internal Solventum Estimation: Average chair time cost in Spain: €60/hour &nbsp;·&nbsp;
+        All figures are illustrative estimates for planning purposes.
+      </p>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
